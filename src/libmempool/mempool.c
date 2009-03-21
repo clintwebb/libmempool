@@ -38,7 +38,7 @@ void mempool_free(mempool_t *pool)
 	assert(pool != NULL);
 
 	// all objects should have been returned to the pool at this point.
-	assert(pool->active == NULL);
+	assert(pool->used == NULL);
 
 	// now we go thru the 'ready' list and remove all the objects in it (which
 	// technically, at this point, there should not be any empty slots in the
@@ -52,7 +52,7 @@ void mempool_free(mempool_t *pool)
 		free(tmp);
 	}
 
-	assert(pool->active == NULL);
+	assert(pool->used == NULL);
 	assert(pool->ready  == NULL);
 }
 
@@ -72,10 +72,11 @@ void * mempool_get(mempool_t *pool, unsigned int amount)
 	buff = NULL;
 	best = NULL;
 	tmp = pool->ready;
-	while (tmp && buff == NULL) {
+	while (tmp) {
 		
 		if (tmp->size == amount) {
 			buff = tmp;
+			tmp = NULL;
 		}
 		else {
 
@@ -108,7 +109,7 @@ void * mempool_get(mempool_t *pool, unsigned int amount)
 
 		assert(buff->data != NULL);
 		assert(buff->size > 0);
-		assert(buff->size >= amount;
+		assert(buff->size >= amount);
 		return(buff->data);
 	}
 	else {
@@ -118,71 +119,94 @@ void * mempool_get(mempool_t *pool, unsigned int amount)
 
 
 //-----------------------------------------------------------------------------
-// Returns a previously provided buffer to the pool.  The buffer must have been
-// allocated through the pool.   If the buffer being returned is larger than
-// the pre-specified max for the pool, then it will be shrunk.  If max is zero,
-// and the buffer is unusually large, then you should shrink it yourself before
-// returning it.
-//
-//	** Should we free the buffer if it is larger than the max, or merely shrink
-//	   it?  I fear that we would likely end up fragmenting memory much quicker
-//	   if we only shrink it.
-// 
-void mempool_return(mempool_t *list, expbuf_t *buffer)
+// Returns a previously provided pointer to the pool.  The pointer must have
+// been retrieved through the pool.
+void mempool_return(mempool_t *pool, void *ptr)
 {
-	int i;
-	int found;
-	
-	assert(list != NULL);
-	assert(buffer != NULL);
+	mempool_entry_t *tmp, *entry;
 
-	assert(list->used.entries > 0 && list->used.list != NULL);
-	assert((list->ready.entries == 0 && list->ready.list == NULL) || (list->ready.entries > 0 && list->ready.list != NULL));
+	assert(pool);
+	assert(ptr);
+	assert(pool->used);
 
-	// check that the buffer is empty.
-	assert(buffer->length == 0);
-
-	assert(list->max >= 0);
-	if (list->max > 0 && buffer->max > list->max) {
-		expbuf_shrink(buffer, list->max);
-	}
-
-	// check that the returned buffer is in the 'used' list.
-	// remove entry from 'used' list.
-	found = -1;
-	for (i=0; i<list->used.entries && found < 0; i++) {
-		if (list->used.list[i] == buffer) {
-			found = i;
-			list->used.list[i] = NULL;
-		}
-	}
-	assert(found >= 0);
-
-	if (found >= 0) {
-		// check that the returned buffer is not already in the 'ready' list.
-		// add buffer to the 'ready' list.
-		found = -1;
-		for (i=0; i<list->ready.entries; i++) {
-			assert(list->ready.list[i] != buffer);
-			if (found < 0) {
-				if (list->ready.list[i] == NULL) {
-					found = i;
-					list->ready.list[i] = buffer;
-				}
-			}
+	// first try and find the pointer in the 'used' list.  Remove the object from it.
+	entry = NULL;
+	tmp = pool->used;
+	while (tmp) {
+		if (tmp->data == ptr) {
+			entry = tmp;
+			if (entry == pool->used) pool->used = entry->next;
+			if (entry->prev) entry->prev->next = entry->next;
+			if (entry->next) entry->next->prev = entry->prev;
+			tmp = NULL;
 		}
 
-		if (found < 0) {
-			// didn't find an empty slot in the 'ready' list, so we need to make one.
-			list->ready.list = (expbuf_t **) realloc(list->ready.list, sizeof(expbuf_t *) * (list->ready.entries + 1));
-			list->ready.list[list->ready.entries] = buffer;
-			list->ready.entries ++;
-		}
+		tmp = tmp->next;
 	}
+	assert(entry != NULL);
+
+	// then add the entry to the
+	entry->prev = NULL;
+	entry->next = pool->ready;
+	pool->ready = entry;
 }
 
 
+//-----------------------------------------------------------------------------
+// The memory pool system does not allocate new memory for the pool.  If no
+// allocation is available, then it returns a NULL.  The calling process then
+// would normally allocate more memory, and assign it to the pool.  Since in
+// most cases, the calling process would normally want to then work with the
+// memory straight away, it will be added to the system in the 'used' pool.
+void mempool_assign(mempool_t *pool, void *ptr, unsigned int size)
+{
+	mempool_entry_t *tmp;
+	
+	assert(pool);
+	assert(ptr);
+	assert(size > 0);
 
+	tmp = (mempool_entry_t *)	malloc(sizeof(mempool_entry_t));
+	assert(tmp);
+	tmp->data = ptr;
+	tmp->size = size;
+	tmp->prev = NULL;
+	tmp->next = pool->used;
+}
+
+
+//-----------------------------------------------------------------------------
+// Sometimes when a chunk of memory is retrieved from the pool, it needs to be
+// removed from the pool and used (or controlled) by something else.   In
+// these cases, it is assumed that the pointer is already in the 'used' list,
+// so the entry will be found and removed, without de-allocating the pointer.
+// It is recommended that the calling function perform a resize on the pointer
+// though, because it might have more memory allocated to it, than was
+// requested.
+void mempool_release(mempool_t *pool, void *ptr)
+{
+	mempool_entry_t *tmp;
+	
+	assert(pool);
+	assert(ptr);
+	assert(pool->used);
+
+	tmp = pool->used;
+	while(tmp) {
+		assert(tmp->data);
+		if (tmp->data == ptr) {
+			assert(tmp->size > 0);
+			if (tmp == pool->used) pool->used = tmp->next;
+			if (tmp->prev) tmp->prev->next = tmp->next;
+			if (tmp->next) tmp->next->prev = tmp->prev;
+			free(tmp);
+			tmp = NULL;
+		}
+		else {
+			tmp = tmp->next;
+		}
+	}
+}
 
 
 

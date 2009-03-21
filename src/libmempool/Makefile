@@ -1,6 +1,6 @@
-## make file for libexpbufpool
+## make file for libmempool
 
-MAINFILE=libexpbufpool.so
+MAINFILE=libmempool.so
 LIBVER=1.0.1
 LIBFILE=$(MAINFILE).$(LIBVER)
 SONAME=$(MAINFILE).1
@@ -17,23 +17,23 @@ REQH=
 
 # Need to be able to make 'man-pages' as well.  Not sure where to get the source for those... 
 
-libexpbufpool.o: expbufpool.c expbufpool.h $(REQH)
-	gcc -c -fPIC expbufpool.c -o $@ $(ARGS)
+libmempool.o: mempool.c mempool.h $(REQH)
+	gcc -c -fPIC mempool.c -o $@ $(ARGS)
 
-libexpbufpool.a: libexpbufpool.o
+libmempool.a: libmempool.o
 	@>$@
 	@rm $@
 	ar rcs $@ $^
 
-$(LIBFILE): libexpbufpool.o
+$(LIBFILE): libmempool.o
 	gcc -shared -Wl,-soname,$(SONAME) -o $@ $^
 
 
-lib-test: lib-test.c $(REQH) /usr/include/expbuf.h
-	gcc lib-test.c -o $@ -lexpbuf -lexpbufpool
+lib-test: lib-test.c $(REQH) /usr/include/mempool.h
+	gcc lib-test.c -o $@ -lmempool
 
-install: $(LIBFILE) expbufpool.h 
-	cp expbufpool.h /usr/include/
+install: $(LIBFILE) mempool.h
+	cp mempool.h /usr/include/
 	cp $(LIBFILE) /usr/lib/
 	@-test -e /usr/lib/$(MAINFILE) && rm /usr/lib/$(MAINFILE)
 	ln -s /usr/lib/$(LIBFILE) /usr/lib/$(MAINFILE)
@@ -54,7 +54,7 @@ man-pages: doc/expbuf_add.3
 	@echo "Man-pages Install complete."
 
 clean:
-	@-[ -e libexpbufpool.o ] && rm libexpbufpool.o
-	@-[ -e libexpbufpool.so* ] && rm libexpbufpool.so*
+	@-[ -e libmempool.o ] && rm libmempool.o
+	@-[ -e libmempool.so* ] && rm libmempool.so*
 	@-test -e lib-test && rm lib-test
 
