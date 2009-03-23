@@ -172,6 +172,7 @@ void mempool_assign(mempool_t *pool, void *ptr, unsigned int size)
 	tmp->size = size;
 	tmp->prev = NULL;
 	tmp->next = pool->used;
+	pool->used = tmp;
 }
 
 
