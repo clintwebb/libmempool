@@ -25,5 +25,8 @@ void mempool_return(mempool_t *pool, void *ptr);
 void mempool_assign(mempool_t *pool, void *ptr, unsigned int size);
 void mempool_release(mempool_t *pool, void *ptr);
 
+unsigned int mempool_active_count(mempool_t *pool);
+unsigned int mempool_inactive_count(mempool_t *pool);
+
 #endif
 

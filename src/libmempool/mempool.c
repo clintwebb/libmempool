@@ -209,4 +209,44 @@ void mempool_release(mempool_t *pool, void *ptr)
 }
 
 
+//-----------------------------------------------------------------------------
+// Return the number of objects in the active, or 'used' list.  Useful
+// statistic to determine the load on the pool.
+unsigned int mempool_active_count(mempool_t *pool)
+{
+	mempool_entry_t *tmp;
+	unsigned int count = 0;
+
+	assert(pool);
+
+	tmp = pool->used;
+	while(tmp) {
+		count++;
+		tmp = tmp->next;
+	}
+
+	return(count);
+}
+
+//-----------------------------------------------------------------------------
+// Return the number of objects in the inactive, or 'ready' list.  Useful
+// statistic to determine if the pool is too heavy, and should be pruned.
+unsigned int mempool_inactive_count(mempool_t *pool)
+{
+	mempool_entry_t *tmp;
+	unsigned int count = 0;
+
+	assert(pool);
+
+	tmp = pool->ready;
+	while(tmp) {
+		count++;
+		tmp = tmp->next;
+	}
+
+	return(count);
+}
+
+
+
 
