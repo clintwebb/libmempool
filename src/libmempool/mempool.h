@@ -3,7 +3,7 @@
 
 // mempool does not create new memory objects as needed.  Ie, it does not automatically expand.  When there are no available objects in the pool, then new ones will need to  be explicitly added.
 
-;
+
 typedef struct __mempool_entry_t {
 	void *data;
 	unsigned int size;
@@ -27,6 +27,8 @@ void mempool_release(mempool_t *pool, void *ptr);
 
 unsigned int mempool_active_count(mempool_t *pool);
 unsigned int mempool_inactive_count(mempool_t *pool);
+
+void * mempool_peek(mempool_t *pool);
 
 #endif
 

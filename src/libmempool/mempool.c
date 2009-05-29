@@ -140,8 +140,9 @@ void mempool_return(mempool_t *pool, void *ptr)
 			if (entry->next) entry->next->prev = entry->prev;
 			tmp = NULL;
 		}
-
-		tmp = tmp->next;
+		else {
+			tmp = tmp->next;
+		}
 	}
 	assert(entry != NULL);
 
@@ -249,5 +250,19 @@ unsigned int mempool_inactive_count(mempool_t *pool)
 }
 
 
+//-----------------------------------------------------------------------------
+// Will return a pointer to the current top object that is in the used pool.
+// Useful really for debugging situations where the pool should be empty, but
+// it isn't.
+// This should ONLY be used when you know that there is something in the used
+// pool.  Otherwise it will assert.
+void * mempool_peek(mempool_t *pool)
+{
+	assert(pool);
+	assert(pool->used);
+	assert(pool->used->data);
+
+	return(pool->used->data);
+}
 
 
