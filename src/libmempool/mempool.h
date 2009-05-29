@@ -1,8 +1,24 @@
 #ifndef __MEMPOOL_H
 #define __MEMPOOL_H
 
-// mempool does not create new memory objects as needed.  Ie, it does not automatically expand.  When there are no available objects in the pool, then new ones will need to  be explicitly added.
 
+#define MEMPOOL_VERSION  0x00010200
+#define MEMPOOL_VERSION_NAME "v1.02.00"
+
+
+// In normal mode:
+//
+//   mempool does not create new memory objects as needed.  Ie, it does not
+//   automatically expand.  When there are no available objects in the pool,
+//   then new ones will need to  be explicitly added.
+//
+// In autoexpand mode:
+//
+//	 when a get is performed, but no chunks are ready, it will automaticalled
+//	 malloc a chunk, add it to the 'used' list, and return it.  This mode
+//	 comes with some warnings.  You cannot assume that the pointer returned
+//	 from a get contains initialised data.  Also, it is slightly more
+//	 difficult to control the limits on resources.
 
 typedef struct __mempool_entry_t {
 	void *data;
