@@ -1,0 +1,92 @@
+.\" man page for libmempool
+.\" Contact dev@hyper-active.com.au to correct errors or omissions. 
+.TH mempool_assign 3 "29 May 2009" "1.02" "Library for handling a pool of various sized memory pointers."
+.SH NAME
+mempool_assign \- Assign a chunk of memory to the pool.
+.SH SYNOPSIS
+#include <mempool.h>
+.sp
+.B void mempool_assign(mempool_t *pool, void *ptr, unsigned int size)
+.br
+.SH DESCRIPTION
+.B mempool_assign()
+is used to add memory to the pool.
+.SH EXAMPLES
+#include <mempool.h>
+.sp
+void process_message(char *msg, mempool_t *msgpool) {
+.br
+	/* do something with the data */
+.br
+	/* if finished with it, return it to the pool */
+.br
+ 	mempool_return(msgpool, msg);
+.br
+}
+.sp
+int main(void) {
+.br
+	mempool_t *msgpool;
+.br
+	char *message;
+.sp
+	msgpool = (mempool_t *) malloc(sizeof(mempool_t));
+.br
+	mempool_init(msgpool);
+.sp
+	/* the pool is currently empty, so we need to put at least one in there, for it to be useful */
+.br
+	message = (char *) malloc(1024);
+.br
+.B 	mempool_assign
+(msgpool, message, 1024);
+.sp
+	while (get_message(message, 1024)) {
+.sp
+		/* pass control of message to this function... which will return 
+.br
+		   it to the message pool when it is finished with it. */
+.br
+		process_message(message, msgpool);
+.sp		
+		/* get another message from the buffer */
+.br
+		message = mempool_get(msgpool, 1024);
+.br
+		if (message == NULL) {
+.br
+			message = (char *) malloc(1024);
+.br
+.B 			mempool_assign
+(msgpool, message, 1024);
+.br
+		}
+.br
+	}
+.sp	
+	/* before exiting, we should be sure that all the outstanding messages have been processed... */
+.sp
+	mempool_free(msgpool);
+.br
+	free(msgpool);
+.br
+	msgpool = NULL;
+.br
+	return(0);
+.br
+}
+.SH SEE ALSO
+.BR libmempool (3),
+.BR mempool_get (3),
+.BR mempool_return (3)
+.SH BUGS
+No known bugs at this time. 
+.SH AUTHOR
+.nf
+Clint Webb (webb.clint@gmail.com)
+on behalf of Hyper-Active Systems, Australia.
+.br
+http://www.hyper-active.com.au/libmempool/
+.fi
+.SH HISTORY
+May 29, 2009 \- v1.02, Manpage created.

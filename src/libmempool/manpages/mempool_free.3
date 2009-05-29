@@ -1,0 +1,53 @@
+.\" man page for libmempool
+.\" Contact dev@hyper-active.com.au to correct errors or omissions. 
+.TH mempool_init 3 "29 May 2009" "1.02" "Library for handling a pool of various sized memory pointers."
+.SH NAME
+mempool_free \- Release the resources allocated for the pool.
+.SH SYNOPSIS
+#include <mempool.h>
+.sp
+.B void mempool_free(mempool_t *pool);
+.br
+.SH DESCRIPTION
+.B mempool_free()
+is used to release resources allocated for the pool.  The pool object should previously have been initialised with mempool_init().  When this is called, there should not be any memory pointed that have not been returned to the pool.  Every memory pointer in the pool will be deallocated with free(), so ensure that all de-initialisation of them is done first.
+.sp
+If there are pointers still allocated, an assertion will be generated.  If you are having problems with outstanding pointers, you can use mempool_peek() to return the pointer for the first allocated entry, which you can examine to try and determine what hasn't been returned to the pool.
+.SH EXAMPLES
+#include <mempool.h>
+.sp
+int main(void) {
+.br
+	mempool_t *msgpool;
+.sp
+	msgpool = (mempool_t *) malloc(sizeof(mempool_t));
+.br
+	mempool_init(msgpool);
+.sp
+	/* do stuff with the msgpool */
+.sp
+.B		mempool_free
+(msgpool);
+.br
+	free(msgpool);
+.br
+	msgpool = NULL;
+.br
+	return(0);
+.br
+}
+.SH SEE ALSO
+.BR libmempool (3),
+.BR mempool_init (3),
+.BR mempool_peek (3)
+.SH BUGS
+No known bugs at this time. 
+.SH AUTHOR
+.nf
+Clint Webb (webb.clint@gmail.com)
+on behalf of Hyper-Active Systems, Australia.
+.br
+http://www.hyper-active.com.au/libmempool/
+.fi
+.SH HISTORY
+May 29, 2009 \- v1.02, Manpage created.

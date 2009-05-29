@@ -13,11 +13,13 @@ typedef struct __mempool_entry_t {
 
 typedef struct {
 	mempool_entry_t *ready, *used;
+	short int expand;
 } mempool_t;
 
 
 void mempool_init(mempool_t *pool);
 void mempool_free(mempool_t *pool);
+void mempool_autoexpand(mempool_t *pool);
 
 void * mempool_get(mempool_t *pool, unsigned int amount);
 void mempool_return(mempool_t *pool, void *ptr);

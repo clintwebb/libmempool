@@ -40,16 +40,11 @@ install: $(LIBFILE) mempool.h
 	nice ldconfig
 	@echo "Install complete."
 
-man-pages: doc/expbuf_add.3
-	cp expbuf.h /usr/include/
-	cp $(LIBFILE) /usr/lib/
-	@-test -e /usr/lib/$(MAINFILE) && rm /usr/lib/$(MAINFILE)
-	ln -s /usr/lib/$(LIBFILE) /usr/lib/$(MAINFILE)
-	nice ldconfig
+man-pages: manpages/libmempool.3
 	@mkdir tmp.install
-	@cp doc/* tmp.install/
-	@gzip tmp.install/expbuf_add.3
-	cp tmp.install/expbuf_add.3.gz $(MANPATH)/man3/
+	@cp manpages/* tmp.install/
+	@gzip tmp.install/*.3
+	cp tmp.install/*.3.gz $(MANPATH)/man3/
 	@rm -r tmp.install	
 	@echo "Man-pages Install complete."
 

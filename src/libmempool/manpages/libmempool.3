@@ -1,0 +1,60 @@
+.\" man page for libmempool
+.\" Contact dev@hyper-active.com.au to correct errors or omissions. 
+.TH libmempool 3 "29 May 2009" "1.02" "Library for handling a pool of various sized memory pointers."
+.SH NAME
+libmempool \- library for managing memory pools
+.SH SYNOPSIS
+.\" Syntax goes here. 
+#include <mempool.h>
+.sp
+.B void mempool_init(mempool_t *pool)
+.br
+.B void mempool_free(mempool_t *pool)
+.br
+.B void mempool_autoexpand(mempool_t *pool);
+.br
+.B void * mempool_get(mempool_t *pool, unsigned int amount)
+.br
+.B void mempool_return(mempool_t *pool, void *ptr)
+.br
+.B void mempool_assign(mempool_t *pool, void *ptr, unsigned int size)
+.br
+.B void mempool_release(mempool_t *pool, void *ptr)
+.br
+.B unsigned int mempool_active_count(mempool_t *pool)
+.br
+.B unsigned int mempool_inactive_count(mempool_t *pool)
+.br
+.B void * mempool_peek(mempool_t *pool)
+.sp
+compile with the 
+.B -lmempool
+option
+.SH DESCRIPTION
+.B libmempool
+is a simple library for handling a pool of allocated memory pointers.  Using malloc() and free() for a lot of various sized objects can result in fragmentation of memory, and takes a considerable number of cpu cycles to complete.  Using libmempool, you re-use the memory that had previously been allocated.  
+.br
+
+.SH SEE ALSO
+.BR mempool_init (3),
+.BR mempool_free (3),
+.BR mempool_autoexpand (3),
+.BR mempool_get (3),
+.BR mempool_return (3),
+.BR mempool_assign (3),
+.BR mempool_release (3),
+.BR mempool_active_count (3),
+.BR mempool_inactive_count (3),
+.BR mempool_peek (3),
+.BR mempool_t (3)
+.SH BUGS
+No known bugs at this time. 
+.SH AUTHOR
+.nf
+Clint Webb (webb.clint@gmail.com)
+on behalf of Hyper-Active Systems, Australia.
+.br
+http://www.hyper-active.com.au/libmempool/
+.fi
+.SH HISTORY
+May 29, 2009 \- v1.02 mempool_autoexpand() added.

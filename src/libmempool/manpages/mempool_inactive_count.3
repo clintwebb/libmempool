@@ -1,0 +1,27 @@
+.\" man page for libmempool
+.\" Contact dev@hyper-inactive.com.au to correct errors or omissions.
+.TH mempool_inactive_count 3 "29 May 2009" "1.02" "Library for handling a pool of various sized memory pointers."
+.SH NAME
+mempool_inactive_count \- returns the number of objects in the pool are available for use.
+.SH SYNOPSIS
+#include <mempool.h>
+.sp
+.B unsigned int mempool_inactive_count(mempool_t *pool)
+.br
+.SH DESCRIPTION
+.B mempool_inactive_count()
+returns the number of items that are not in use.  
+.SH SEE ALSO
+.BR libmempool (3),
+.BR mempool_active_count (3),
+.SH BUGS
+No known bugs at this time. 
+.SH AUTHOR
+.nf
+Clint Webb (webb.clint@gmail.com)
+on behalf of Hyper-Active Systems, Australia.
+.br
+http://www.hyper-active.com.au/libmempool/
+.fi
+.SH HISTORY
+May 29, 2009 \- v1.02, Manpage created.

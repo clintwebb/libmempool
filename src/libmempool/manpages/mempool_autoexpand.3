@@ -1,0 +1,61 @@
+.\" man page for libmempool
+.\" Contact dev@hyper-active.com.au to correct errors or omissions. 
+.TH mempool_autoexpand 3 "29 May 2009" "1.02" "Library for handling a pool of various sized memory pointers."
+.SH NAME
+mempool_autoexpand \- Set the mode so that the mempool will automatically allocate more memory when required.
+.SH SYNOPSIS
+.B #include <mempool.h>
+.sp
+.B void mempool_autoexpand(mempool_t *pool);
+.br
+.SH DESCRIPTION
+.B mempool_autoexpand()
+is used to put the pool in autoexpand mode.
+.sp
+Under normal mode, when mempool_get() is called but there is no more memory pointers available (or of suitable size), it would return a NULL.   It would be assumed that the memory would be allocated, initialized somehow, and added to the mempool with mempool_assign().   This gives control over the initialisation of new objects.  Also, you can pre-fill a pool with a certain number of objects, and if they are used, dont allocate more.
+.sp
+When autoexpand is enabled, it means that when a mempool_get() is called, it will use malloc to allocate the amount of memory requested and automatically add it to the pool.
+.sp
+.B WARNING:
+By using this method, you should always get a pointer returned from a mempool_get, but you cannot assume that the memory returned is initialised in any way.   Therefore, after every get, you would need to initialise as if the structure contains random garbage.  Additionally, you have less control over the amount of memory that is allocated.  
+.SH EXAMPLES
+#include <mempool.h>
+.sp
+int main(void) {
+.br
+	mempool_t *msgpool;
+.sp
+	msgpool = (mempool_t *) malloc(sizeof(mempool_t));
+.br
+	mempool_init(msgpool);
+.br
+.B 	mempool_autoexpand
+(msgpool);
+.sp
+	/* do stuff with the msgpool */
+.sp
+	mempool_free(msgpool);
+.br
+	free(msgpool);
+.br
+	msgpool = NULL;
+.br
+	return(0);
+.br
+}
+.SH SEE ALSO
+.BR libmempool (3),
+.BR mempool_init (3),
+.BR mempool_get (3),
+.BR mempool_assign (3)
+.SH BUGS
+No known bugs at this time. 
+.SH AUTHOR
+.nf
+Clint Webb (webb.clint@gmail.com)
+on behalf of Hyper-Active Systems, Australia.
+.br
+http://www.hyper-active.com.au/libmempool/
+.fi
+.SH HISTORY
+May 29, 2009 \- v1.02, Manpage created.

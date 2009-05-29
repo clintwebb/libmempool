@@ -1,0 +1,28 @@
+.\" man page for libmempool
+.\" Contact dev@hyper-active.com.au to correct errors or omissions. 
+.TH mempool_peek 3 "29 May 2009" "1.02" "Library for handling a pool of various sized memory pointers."
+.SH NAME
+mempool_peek \- Returns a pointer to the last active pointer.
+.SH SYNOPSIS
+#include <mempool.h>
+.sp
+.B void * mempool_peek(mempool_t *pool)
+.br
+.SH DESCRIPTION
+.B mempool_peek()
+should really only be used when trying to determine what entries have not been returned to the pool.  The pool should not have any active items when shutting down.  If there are any, then an assertion is called.  This function can return the pointer of an active object, which can be examined to determine what it is, and therefore possibly determine why it wasn't returned to the pool.
+.SH SEE ALSO
+.BR libmempool (3),
+.BR mempool_return (3),
+.BR mempool_free (3)
+.SH BUGS
+No known bugs at this time. 
+.SH AUTHOR
+.nf
+Clint Webb (webb.clint@gmail.com)
+on behalf of Hyper-Active Systems, Australia.
+.br
+http://www.hyper-active.com.au/libmempool/
+.fi
+.SH HISTORY
+May 29, 2009 \- v1.02, Manpage created.

@@ -25,6 +25,7 @@ void mempool_init(mempool_t *pool)
 	
 	pool->ready = NULL;
 	pool->used  = NULL;
+	pool->expand = 0;
 }
 
 
@@ -65,6 +66,7 @@ void mempool_free(mempool_t *pool)
 void * mempool_get(mempool_t *pool, unsigned int amount)
 {
 	mempool_entry_t *buff, *tmp, *best;
+	void *ptr;
 	
 	assert(pool != NULL);
 	assert(amount >= 0);
@@ -111,6 +113,11 @@ void * mempool_get(mempool_t *pool, unsigned int amount)
 		assert(buff->size > 0);
 		assert(buff->size >= amount);
 		return(buff->data);
+	}
+	else if (pool->expand != 0) {
+		ptr = malloc(amount);
+		mempool_assign(pool, ptr, amount);
+		return(ptr);
 	}
 	else {
 		return(NULL);
@@ -173,6 +180,10 @@ void mempool_assign(mempool_t *pool, void *ptr, unsigned int size)
 	tmp->size = size;
 	tmp->prev = NULL;
 	tmp->next = pool->used;
+	if (pool->used) {
+		assert(pool->used->prev == NULL);
+		pool->used->prev = tmp;
+	}
 	pool->used = tmp;
 }
 
@@ -265,4 +276,14 @@ void * mempool_peek(mempool_t *pool)
 	return(pool->used->data);
 }
 
+
+//-----------------------------------------------------------------------------
+// Change the mode of the pool so that it automatically allocates new memory to
+// the pool when all are active and a get is called.
+void mempool_autoexpand(mempool_t *pool)
+{
+	assert(pool);
+	assert(pool->expand == 0);
+	pool->expand = 1;
+}
 
